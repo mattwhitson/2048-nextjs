@@ -1,4 +1,4 @@
-import { TileState } from "@/lib/store";
+import { TileState } from "@/lib/board-store";
 import { cn } from "@/lib/utils";
 
 const COLORS = [

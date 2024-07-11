@@ -5,7 +5,7 @@ import {
   boardReducer,
   BoardState,
   defaultBoardState,
-} from "@/lib/store";
+} from "@/lib/board-store";
 import {
   Context,
   createContext,

@@ -10,11 +10,8 @@ export interface TileState {
 export interface BoardState {
   boardSize: number;
   tiles: TileState[];
-}
-
-interface InitBoard {
-  type: "initBoard";
-  payload: BoardState;
+  currentGameState: "Lost" | "Won" | "Playing";
+  currentScore: number;
 }
 
 interface ResizeBoard {
@@ -22,21 +19,44 @@ interface ResizeBoard {
   payload: number;
 }
 
-interface InitTiles {
-  type: "initTiles";
-  payload: TileState[];
-}
-
 interface UpdateTiles {
   type: "updateTiles";
   payload: TileState[];
 }
 
-export type BoardActions = ResizeBoard | InitTiles | InitBoard | UpdateTiles;
+interface GameOver {
+  type: "endGame";
+  payload: "Lost";
+}
+
+interface RestartGame {
+  type: "restartGame";
+  payload: number;
+}
+
+interface WonGame {
+  type: "wonGame";
+  payload: "Won";
+}
+
+interface UpdateScore {
+  type: "updateScore";
+  payload: number;
+}
+
+export type BoardActions =
+  | ResizeBoard
+  | UpdateTiles
+  | GameOver
+  | RestartGame
+  | WonGame
+  | UpdateScore;
 
 export const defaultBoardState: BoardState = {
   boardSize: 4,
   tiles: initBoardState(4),
+  currentGameState: "Playing",
+  currentScore: 0,
 };
 
 export function initBoardState(dimensions: number) {
@@ -81,12 +101,21 @@ export function boardReducer(state: BoardState, action: BoardActions) {
   switch (action.type) {
     case "resizeBoard":
       return { ...state, boardSize: action.payload };
-    case "initTiles":
-      return { ...state, tiles: action.payload };
-    case "initBoard":
-      return { ...state };
     case "updateTiles":
       return { ...state, tiles: action.payload };
+    case "endGame":
+      return { ...state, currentGameState: action.payload };
+    case "restartGame":
+      return {
+        boardSize: action.payload,
+        tiles: initBoardState(action.payload),
+        currentGameState: "Playing",
+        currentScore: 0,
+      };
+    case "wonGame":
+      return { ...state, currentGameState: action.payload };
+    case "updateScore":
+      return { ...state, currentScore: state.currentScore + action.payload };
     default:
       throw Error("Unknown action type");
   }
