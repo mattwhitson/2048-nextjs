@@ -1,6 +1,6 @@
 import { create } from "zustand";
 
-type ModalType = "EndGame";
+type ModalType = "EndGame" | "Settings";
 
 interface ModalStore {
   type: ModalType | null;

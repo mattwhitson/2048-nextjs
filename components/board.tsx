@@ -36,20 +36,22 @@ export function Board() {
   }, [currentGameState, onOpen, currentScore]);
 
   return (
-    <section className="mt-24">
-      <div className="flex flex-col relative p-2 bg-[hsl(var(--border))]">
+    <main className="mt-24">
+      <section className="flex flex-col relative p-2 bg-[hsl(var(--border))]">
         {grid.map((row, i) => (
           <div className="flex flex-row" key={i}>
             {row.map((col, j) => (
               <div
-                className={cn("w-[200px] h-[200px] bg-background m-2")}
+                className={cn(
+                  "w-[200px] h-[200px] bg-background m-2 rounded-sm"
+                )}
                 key={i + j}
               ></div>
             ))}
           </div>
         ))}
         <Tiles />
-      </div>
-    </section>
+      </section>
+    </main>
   );
 }

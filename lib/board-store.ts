@@ -20,8 +20,8 @@ interface ResizeBoard {
 }
 
 interface UpdateTiles {
-  type: "updateTiles";
-  payload: TileState[];
+  type: "updateGameState";
+  payload: { tiles: TileState[]; points: number };
 }
 
 interface GameOver {
@@ -39,18 +39,12 @@ interface WonGame {
   payload: "Won";
 }
 
-interface UpdateScore {
-  type: "updateScore";
-  payload: number;
-}
-
 export type BoardActions =
   | ResizeBoard
   | UpdateTiles
   | GameOver
   | RestartGame
-  | WonGame
-  | UpdateScore;
+  | WonGame;
 
 export const defaultBoardState: BoardState = {
   boardSize: 4,
@@ -101,8 +95,12 @@ export function boardReducer(state: BoardState, action: BoardActions) {
   switch (action.type) {
     case "resizeBoard":
       return { ...state, boardSize: action.payload };
-    case "updateTiles":
-      return { ...state, tiles: action.payload };
+    case "updateGameState":
+      return {
+        ...state,
+        tiles: action.payload.tiles,
+        currentScore: state.currentScore + action.payload.points,
+      };
     case "endGame":
       return { ...state, currentGameState: action.payload };
     case "restartGame":
@@ -114,8 +112,6 @@ export function boardReducer(state: BoardState, action: BoardActions) {
       };
     case "wonGame":
       return { ...state, currentGameState: action.payload };
-    case "updateScore":
-      return { ...state, currentScore: state.currentScore + action.payload };
     default:
       throw Error("Unknown action type");
   }
