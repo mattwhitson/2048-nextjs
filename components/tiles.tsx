@@ -3,15 +3,20 @@
 import { useEffect, useState } from "react";
 import { useBoardStateContext } from "@/components/providers/board-state-provider";
 import { cn } from "@/lib/utils";
-import { generateNewTile, TileState } from "@/lib/store";
+import { generateNewTile, TileState } from "@/lib/board-store";
 import { Tile } from "./tile";
+
+const moves = ["ArrowRight", "ArrowUp", "ArrowDown", "ArrowLeft"] as const;
+type PossibleMoves = (typeof moves)[number];
 
 function insertIntoEmptyGridSquare(
   tiles: TileState[],
   currentPos: number,
   candidatePos: number
 ) {
+  console.log("yo");
   if (currentPos === candidatePos) return;
+  console.log("should never happend");
   tiles[candidatePos] = tiles[currentPos];
   tiles[currentPos] = generateNewTile(currentPos, -1);
 }
@@ -41,16 +46,16 @@ function mirrorYAxis(tiles: TileState[], dimensions: number) {
 }
 
 function reorientTiles(
-  e: KeyboardEvent,
+  direction: PossibleMoves,
   tiles: TileState[],
   dimensions: number,
   before: boolean = true
 ): TileState[] {
-  if (e.key === "ArrowRight") {
+  if (direction === "ArrowRight") {
     mirrorXAxis(tiles, dimensions);
-  } else if (e.key === "ArrowUp") {
+  } else if (direction === "ArrowUp") {
     mirrorYAxis(tiles, dimensions);
-  } else if (e.key === "ArrowDown") {
+  } else if (direction === "ArrowDown") {
     if (before) {
       mirrorYAxis(tiles, dimensions);
       mirrorXAxis(tiles, dimensions);
@@ -63,11 +68,13 @@ function reorientTiles(
 }
 
 function calculateMove(
-  e: KeyboardEvent,
+  direction: PossibleMoves,
   originalTiles: TileState[],
   dimensions: number
 ) {
-  const tiles = reorientTiles(e, originalTiles.slice(), dimensions);
+  const tiles = reorientTiles(direction, originalTiles.slice(), dimensions);
+
+  let pointsGainedThisMove = 0;
   for (let row = 0; row < dimensions; row++) {
     for (let col = 0; col < dimensions; col++) {
       if (tiles[row * dimensions + col].value === -1) {
@@ -87,11 +94,15 @@ function calculateMove(
           tiles[candidatePos].value === tiles[currentPos].value &&
           !tiles[candidatePos].hasChanged
         ) {
-          tiles[candidatePos] = tiles[currentPos];
+          // !!!!!!!!Never forget that you have to clone objects when you assign them, i wasted something like 30 minutes on this stupid bug!!!!!!!!
+          tiles[candidatePos] = structuredClone(tiles[currentPos]);
           tiles[candidatePos].value *= 2;
+          pointsGainedThisMove += tiles[candidatePos].value;
+
           tiles[candidatePos].hasChanged = true;
-          tiles[currentPos] = generateNewTile(currentPos, -1);
+          tiles[currentPos] = generateNewTile(tiles[currentPos].position, -1);
         } else {
+          console.log("yes");
           insertIntoEmptyGridSquare(tiles, currentPos, candidatePos + 1);
         }
         break;
@@ -99,7 +110,8 @@ function calculateMove(
     }
   }
 
-  reorientTiles(e, tiles, dimensions, false);
+  reorientTiles(direction, tiles, dimensions, false);
+
   return tiles;
 }
 
@@ -107,9 +119,35 @@ function getRandomTile(range: number) {
   return Math.floor(Math.random() * range);
 }
 
+function hasNextMove(tiles: TileState[], dimensions: number) {
+  for (const move of moves) {
+    const returnedBoardState = calculateMove(
+      move as PossibleMoves,
+      tiles,
+      dimensions
+    );
+
+    if (hasBoardStateChanged(tiles, returnedBoardState, dimensions))
+      return true;
+  }
+  return false;
+}
+
+function hasBoardStateChanged(
+  tiles: TileState[],
+  tempCopy: TileState[],
+  dimensions: number
+) {
+  for (let i = 0; i < dimensions * dimensions; i++) {
+    if (tempCopy[i] !== tiles[i]) return true;
+  }
+
+  return false;
+}
+
 export function Tiles() {
   const { boardState, dispatch } = useBoardStateContext();
-  const { tiles, boardSize } = boardState;
+  const { tiles, boardSize, currentGameState } = boardState;
   const [isMounted, setIsMounted] = useState(false);
 
   useEffect(() => {
@@ -117,23 +155,19 @@ export function Tiles() {
 
     const handleKeyPress = (e: KeyboardEvent) => {
       if (
-        e.key !== "ArrowRight" &&
-        e.key !== "ArrowLeft" &&
-        e.key !== "ArrowUp" &&
-        e.key !== "ArrowDown"
+        (e.key !== "ArrowRight" &&
+          e.key !== "ArrowLeft" &&
+          e.key !== "ArrowUp" &&
+          e.key !== "ArrowDown") ||
+        currentGameState === "Lost"
       )
         return;
 
-      const tempCopy = calculateMove(e, tiles, boardSize);
+      const tempCopy = calculateMove(e.key, tiles, boardSize);
       const freePositions = [];
 
-      let hasChanged = false;
-      for (let i = 0; i < boardSize * boardSize; i++) {
-        if (tempCopy[i] !== tiles[i]) hasChanged = true;
-      }
+      if (!hasBoardStateChanged(tiles, tempCopy, boardSize)) return;
 
-      if (!hasChanged) return;
-      console.log(JSON.parse(JSON.stringify(tempCopy)));
       for (let i = 0; i < boardSize * boardSize; i++) {
         tempCopy[i].position = i;
         tempCopy[i].hasChanged = false;
@@ -161,13 +195,18 @@ export function Tiles() {
        *}
        * dispatch({ type: "updateTiles", payload: tempCopy });
        */
+
+      if (!hasNextMove(tempCopy, boardSize)) {
+        dispatch({ type: "endGame", payload: "Lost" });
+      }
+
       dispatch({ type: "updateTiles", payload: tempCopy });
     };
 
     window.addEventListener("keydown", handleKeyPress);
 
     return () => window.removeEventListener("keydown", handleKeyPress);
-  }, [tiles, boardSize, dispatch]);
+  }, [tiles, boardSize, dispatch, currentGameState]);
 
   if (!isMounted) {
     return null;

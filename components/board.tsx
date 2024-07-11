@@ -1,9 +1,10 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useBoardStateContext } from "./providers/board-state-provider";
+import { useBoardStateContext } from "@/components/providers/board-state-provider";
 import { cn } from "@/lib/utils";
-import { Tiles } from "./tiles";
+import { Tiles } from "@/components/tiles";
+import { useModal } from "@/lib/modal-store";
 
 function initGrid(dimensions: number) {
   const grid = new Array(dimensions);
@@ -18,12 +19,21 @@ function initGrid(dimensions: number) {
 
 export function Board() {
   const { boardState } = useBoardStateContext();
-  const { boardSize } = boardState;
+  const { onOpen } = useModal();
+  const { boardSize, currentGameState, currentScore } = boardState;
   const [grid, setGrid] = useState<number[][]>(initGrid(boardSize));
 
   useEffect(() => {
     setGrid(initGrid(boardSize));
   }, [boardSize]);
+
+  useEffect(() => {
+    if (currentGameState === "Lost") {
+      onOpen("EndGame", currentScore);
+    } else if (currentGameState === "Won") {
+      // TODO: open winning modal
+    }
+  }, [currentGameState, onOpen, currentScore]);
 
   return (
     <section className="mt-24">

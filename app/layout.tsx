@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Poppins } from "next/font/google";
 import "./globals.css";
 import { BoardContextProvider } from "@/components/providers/board-state-provider";
+import { ModalProvider } from "@/components/providers/modal-provider";
 
 const inter = Poppins({
   subsets: ["latin"],
@@ -21,7 +22,10 @@ export default function RootLayout({
   return (
     <html lang="en" className="dark">
       <body className={inter.className}>
-        <BoardContextProvider>{children}</BoardContextProvider>
+        <BoardContextProvider>
+          <ModalProvider />
+          {children}
+        </BoardContextProvider>
       </body>
     </html>
   );
