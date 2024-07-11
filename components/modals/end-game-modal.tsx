@@ -13,9 +13,11 @@ import { useBoardStateContext } from "../providers/board-state-provider";
 
 export function EndGameModal() {
   const { boardState, dispatch } = useBoardStateContext();
-  const { isOpen, onClose } = useModal();
+  const { isOpen, onClose, type } = useModal();
+  const { currentScore, boardSize } = boardState;
+  const isModalOpen = isOpen && type === "EndGame";
   return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
+    <Dialog open={isModalOpen} onOpenChange={onClose}>
       <DialogContent
         className="dark:bg-black"
         hideCloseButton={true}
@@ -31,13 +33,13 @@ export function EndGameModal() {
         </DialogHeader>
         <div className="flex flex-col justify-center items-center my-12">
           <h3>You&apos;re score was:</h3>
-          <p className="text-4xl">PLACEHOLDER!</p>
+          <p className="text-4xl">{currentScore}</p>
         </div>
         <Button
           className="w-[50%] mx-auto"
           variant="outline"
           onClick={() => {
-            dispatch({ type: "restartGame", payload: boardState.boardSize });
+            dispatch({ type: "restartGame", payload: boardSize });
             onClose();
           }}
         >

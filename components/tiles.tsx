@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from "react";
 import { useBoardStateContext } from "@/components/providers/board-state-provider";
-import { cn } from "@/lib/utils";
 import { generateNewTile, TileState } from "@/lib/board-store";
 import { Tile } from "./tile";
 
@@ -14,9 +13,7 @@ function insertIntoEmptyGridSquare(
   currentPos: number,
   candidatePos: number
 ) {
-  console.log("yo");
   if (currentPos === candidatePos) return;
-  console.log("should never happend");
   tiles[candidatePos] = tiles[currentPos];
   tiles[currentPos] = generateNewTile(currentPos, -1);
 }
@@ -102,7 +99,6 @@ function calculateMove(
           tiles[candidatePos].hasChanged = true;
           tiles[currentPos] = generateNewTile(tiles[currentPos].position, -1);
         } else {
-          console.log("yes");
           insertIntoEmptyGridSquare(tiles, currentPos, candidatePos + 1);
         }
         break;
@@ -112,7 +108,7 @@ function calculateMove(
 
   reorientTiles(direction, tiles, dimensions, false);
 
-  return tiles;
+  return { tiles, pointsGainedThisMove };
 }
 
 function getRandomTile(range: number) {
@@ -127,7 +123,7 @@ function hasNextMove(tiles: TileState[], dimensions: number) {
       dimensions
     );
 
-    if (hasBoardStateChanged(tiles, returnedBoardState, dimensions))
+    if (hasBoardStateChanged(tiles, returnedBoardState.tiles, dimensions))
       return true;
   }
   return false;
@@ -166,19 +162,19 @@ export function Tiles() {
       const tempCopy = calculateMove(e.key, tiles, boardSize);
       const freePositions = [];
 
-      if (!hasBoardStateChanged(tiles, tempCopy, boardSize)) return;
+      if (!hasBoardStateChanged(tiles, tempCopy.tiles, boardSize)) return;
 
       for (let i = 0; i < boardSize * boardSize; i++) {
-        tempCopy[i].position = i;
-        tempCopy[i].hasChanged = false;
-        if (tempCopy[i].value === -1) {
+        tempCopy.tiles[i].position = i;
+        tempCopy.tiles[i].hasChanged = false;
+        if (tempCopy.tiles[i].value === -1) {
           freePositions.push(i);
         }
       }
 
       const nextTilePosition =
         freePositions[getRandomTile(freePositions.length)];
-      tempCopy[nextTilePosition] = generateNewTile(nextTilePosition);
+      tempCopy.tiles[nextTilePosition] = generateNewTile(nextTilePosition);
       // When i want to add animations, I'll need to do some sort of transition between old and new state before just updating the state
       // because as it is right now, the old ones will immediately be deleted from the DOM as soon as I update the state, which
       // is not something i want to have happen
@@ -196,11 +192,17 @@ export function Tiles() {
        * dispatch({ type: "updateTiles", payload: tempCopy });
        */
 
-      if (!hasNextMove(tempCopy, boardSize)) {
+      if (!hasNextMove(tempCopy.tiles, boardSize)) {
         dispatch({ type: "endGame", payload: "Lost" });
       }
 
-      dispatch({ type: "updateTiles", payload: tempCopy });
+      dispatch({
+        type: "updateGameState",
+        payload: {
+          tiles: tempCopy.tiles,
+          points: tempCopy.pointsGainedThisMove,
+        },
+      });
     };
 
     window.addEventListener("keydown", handleKeyPress);
