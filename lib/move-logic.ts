@@ -159,9 +159,6 @@ function canPerformAnotherMove(tiles: TileState[], boardSize: number) {
   console.log(tiles);
   for (let row = 0; row < boardSize; row++) {
     for (let col = 0; col < boardSize; col++) {
-      const cand1 = tiles[row * boardSize + col];
-      const cand2 = tiles[row * boardSize + col + 1];
-      const cand3 = tiles[(row + 1) * boardSize + col];
       if (
         (col + 1 < boardSize &&
           tiles[row * boardSize + col].value ===
@@ -281,4 +278,11 @@ export function finishMoveCallback(
 
   tiles[newTilePosition].value = Math.random() < 0.1 ? 4 : 2;
   tilesMap.set(tiles[newTilePosition].arrayIndex, tiles[newTilePosition]);
+}
+
+export function hasWonGame(tiles: TileState[]) {
+  for (let i = 0; i < tiles.length; i++)
+    if (tiles[i].value === 2048) return true;
+
+  return false;
 }

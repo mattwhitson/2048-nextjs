@@ -5,6 +5,7 @@ import { useBoardStateContext } from "@/components/providers/board-state-provide
 import { cn } from "@/lib/utils";
 import { Tiles } from "@/components/tiles";
 import { useModal } from "@/lib/modal-store";
+import { GameState } from "@/lib/board-store";
 
 function initGrid(dimensions: number) {
   const grid = new Array(dimensions);
@@ -28,10 +29,10 @@ export function Board() {
   }, [boardSize]);
 
   useEffect(() => {
-    if (currentGameState === "Lost") {
+    if (currentGameState === GameState.Lost) {
       onOpen("EndGame", currentScore);
     } else if (currentGameState === "Won") {
-      // TODO: open winning modal
+      onOpen("WonGame");
     }
   }, [currentGameState, onOpen, currentScore]);
 
@@ -42,9 +43,11 @@ export function Board() {
           <div className="flex flex-row" key={i}>
             {row.map((col, j) => (
               <div
-                className={cn(
-                  "w-[200px] h-[200px] bg-background m-2 rounded-sm"
-                )}
+                className={cn(`bg-background m-2 rounded-sm`)}
+                style={{
+                  width: `${200 * (4 / boardSize)}px`,
+                  height: `${200 * (4 / boardSize)}px`,
+                }}
                 key={i + j}
               ></div>
             ))}

@@ -2,16 +2,18 @@
 
 import { useEffect, useState } from "react";
 import { useBoardStateContext } from "@/components/providers/board-state-provider";
-import { generateNewTile, TileState } from "@/lib/board-store";
+import { GameState, generateNewTile, TileState } from "@/lib/board-store";
 import { Tile } from "./tile";
 import {
   findDeletedTiles,
   finishMoveCallback,
   handleMove,
   hasNextMove,
+  hasWonGame,
   invalidMove,
   reorderTiles,
 } from "@/lib/move-logic";
+import { useModal } from "@/lib/modal-store";
 
 export function Tiles() {
   const { boardState, dispatch } = useBoardStateContext();
@@ -28,7 +30,8 @@ export function Tiles() {
           e.key !== "ArrowLeft" &&
           e.key !== "ArrowUp" &&
           e.key !== "ArrowDown") ||
-        currentGameState === "Lost" ||
+        currentGameState === GameState.Lost ||
+        currentGameState === GameState.Won ||
         currentlyMovingTiles
       )
         return;
@@ -55,6 +58,10 @@ export function Tiles() {
       setTimeout(() => {
         finishMoveCallback(tiles, tilesMap, deletedPositions, boardSize);
 
+        if (currentGameState === GameState.Playing && hasWonGame(tiles)) {
+          dispatch({ type: "updateCurrentGameState", payload: GameState.Won });
+        }
+
         dispatch({
           type: "updateGameState",
           payload: {
@@ -66,7 +73,7 @@ export function Tiles() {
         });
 
         if (!hasNextMove(tiles, boardSize)) {
-          dispatch({ type: "endGame", payload: "Lost" });
+          dispatch({ type: "updateCurrentGameState", payload: GameState.Lost });
         }
       }, 150); // sliding animation is 150ms long
 

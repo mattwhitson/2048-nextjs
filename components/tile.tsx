@@ -1,5 +1,8 @@
+"use client";
+
 import { TileState } from "@/lib/board-store";
 import { cn } from "@/lib/utils";
+import { useBoardStateContext } from "./providers/board-state-provider";
 
 const COLORS = [
   "bg-slate-300",
@@ -21,9 +24,11 @@ interface TileProps {
 }
 
 export function Tile({ tile, borderPaddingOffset = 1 }: TileProps) {
-  const xOffset = (tile.position % 4) * 100;
+  const { boardState } = useBoardStateContext();
+  const { boardSize } = boardState;
+  const xOffset = (tile.position % boardSize) * 100;
   const xBorderOffset = borderPaddingOffset * (xOffset / 100);
-  const yOffset = Math.floor(tile.position / 4) * 100;
+  const yOffset = Math.floor(tile.position / boardSize) * 100;
   const yBorderOffset = borderPaddingOffset * (yOffset / 100);
 
   // when recalcuting board size, we will need to take into account top and left values for padding/margin of grid
@@ -31,11 +36,13 @@ export function Tile({ tile, borderPaddingOffset = 1 }: TileProps) {
   return (
     <div
       className={cn(
-        `absolute w-[200px] h-[200px] flex items-center justify-center text-3xl text-black font-semibold top-4 left-4 rounded-sm transition-all`,
+        `absolute flex items-center justify-center text-3xl text-black font-semibold top-4 left-4 rounded-sm transition-all`,
         COLORS[(Math.log(tile.value) / Math.log(2) - 1) % COLORS.length]
       )}
       style={{
         transform: `translate(calc(${xOffset}% + ${xBorderOffset}rem), calc(${yOffset}% + ${yBorderOffset}rem))`,
+        width: `${200 * (4 / boardSize)}px`,
+        height: `${200 * (4 / boardSize)}px`,
       }}
     >
       {tile.value !== -1 && tile.value}
