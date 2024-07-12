@@ -75,11 +75,43 @@ export function initBoardState(dimensions: number) {
     Math.floor(Math.random() * dimensions * dimensions)
   );
 
+  // const tile1 = generateNewTile(0, 2);
+  // const tile2 = generateNewTile(1, 4);
+  // const tile3 = generateNewTile(2, 8);
+  // const tile4 = generateNewTile(4, 4);
+  // const tile5 = generateNewTile(5, 8);
+  const tile6 = generateNewTile(6, 16);
+  const tile7 = generateNewTile(7, 4);
+  const tile8 = generateNewTile(8, 16);
+  const tile9 = generateNewTile(9, 128);
+  const tile10 = generateNewTile(10, 4);
+  const tile11 = generateNewTile(11, 2);
+  const tile12 = generateNewTile(12, 2);
+  const tile13 = generateNewTile(13, 4);
+  const tile14 = generateNewTile(14, 16);
+  const tile15 = generateNewTile(15, 4);
+
   while (tile2.position === tile1.position)
     tile2.position = Math.floor(Math.random() * dimensions * dimensions);
 
   tiles[tile1.position] = tile1;
   tiles[tile2.position] = tile2;
+
+  // tiles[tile1.position] = tile1;
+  // tiles[tile2.position] = tile2;
+  // tiles[tile3.position] = tile3;
+  // tiles[tile4.position] = tile4;
+  // tiles[tile5.position] = tile5;
+  tiles[tile6.position] = tile6;
+  tiles[tile7.position] = tile7;
+  tiles[tile8.position] = tile8;
+  tiles[tile9.position] = tile9;
+  tiles[tile10.position] = tile10;
+  tiles[tile11.position] = tile11;
+  tiles[tile12.position] = tile12;
+  tiles[tile13.position] = tile13;
+  tiles[tile14.position] = tile14;
+  tiles[tile15.position] = tile15;
 
   const tilesMap: TileStateMap = new Map();
 

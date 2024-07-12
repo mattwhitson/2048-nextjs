@@ -155,6 +155,33 @@ function calculateNewTilePositions(
   return pointsAwarded;
 }
 
+function canPerformAnotherMove(tiles: TileState[], boardSize: number) {
+  console.log(tiles);
+  for (let row = 0; row < boardSize; row++) {
+    for (let col = 0; col < boardSize; col++) {
+      const cand1 = tiles[row * boardSize + col];
+      const cand2 = tiles[row * boardSize + col + 1];
+      const cand3 = tiles[(row + 1) * boardSize + col];
+      if (
+        (col + 1 < boardSize &&
+          tiles[row * boardSize + col].value ===
+            tiles[row * boardSize + col + 1].value) ||
+        (row + 1 < boardSize &&
+          tiles[row * boardSize + col].value ===
+            tiles[(row + 1) * boardSize + col].value) ||
+        tiles[row * boardSize + col].value === -1 ||
+        (col + 1 < boardSize &&
+          tiles[row * boardSize + col + 1].value === -1) ||
+        (row + 1 < boardSize && tiles[(row + 1) * boardSize + col].value === -1)
+      ) {
+        return true;
+      }
+    }
+  }
+
+  return false;
+}
+
 export function handleMove(
   key: PossibleMoves,
   tiles: TileState[],
@@ -176,10 +203,18 @@ export function invalidMove(
   boardSize: number
 ) {
   tempTilesCopy.sort((a, b) => a.position - b.position);
-  console.log(JSON.parse(JSON.stringify(tempTilesCopy)));
-  console.log(JSON.parse(JSON.stringify(tiles)));
   for (let i = 0; i < boardSize * boardSize; i++) {
     if (tempTilesCopy[i] !== tiles[i]) return true;
+  }
+
+  return false;
+}
+
+export function hasNextMove(tiles: TileState[], boardSize: number) {
+  const copy = tiles.slice();
+  copy.sort((a, b) => a.position - b.position);
+  for (const move in moves) {
+    if (canPerformAnotherMove(copy, boardSize)) return true;
   }
 
   return false;
