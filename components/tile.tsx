@@ -28,11 +28,10 @@ export function Tile({ tile, borderPaddingOffset = 1 }: TileProps) {
 
   // when recalcuting board size, we will need to take into account top and left values for padding/margin of grid
   // also will need to calculate the width of the squares dynamically and yeah, prpobably something else im forgetting
-
   return (
     <div
       className={cn(
-        `absolute w-[200px] h-[200px] flex items-center justify-center text-3xl text-black font-semibold top-4 left-4 rounded-sm`,
+        `absolute w-[200px] h-[200px] flex items-center justify-center text-3xl text-black font-semibold top-4 left-4 rounded-sm transition-transform`,
         COLORS[(Math.log(tile.value) / Math.log(2) - 1) % COLORS.length]
       )}
       style={{
