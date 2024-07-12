@@ -8,6 +8,7 @@ import {
   findDeletedTiles,
   finishMoveCallback,
   handleMove,
+  hasNextMove,
   invalidMove,
   reorderTiles,
 } from "@/lib/move-logic";
@@ -35,7 +36,6 @@ export function Tiles() {
       const tempTilesCopy = tiles.slice();
 
       reorderTiles(tiles, tilesMap, boardSize);
-
       const points = handleMove(e.key, tiles, tilesMap, boardSize);
 
       if (!invalidMove(tiles, tempTilesCopy, boardSize)) return;
@@ -64,6 +64,10 @@ export function Tiles() {
             currentlyMovingTiles: false,
           },
         });
+
+        if (!hasNextMove(tiles, boardSize)) {
+          dispatch({ type: "endGame", payload: "Lost" });
+        }
       }, 150); // sliding animation is 150ms long
 
       for (let i = 0; i < boardSize * boardSize; i++) {

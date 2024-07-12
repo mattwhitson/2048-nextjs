@@ -31,7 +31,7 @@ export function Tile({ tile, borderPaddingOffset = 1 }: TileProps) {
   return (
     <div
       className={cn(
-        `absolute w-[200px] h-[200px] flex items-center justify-center text-3xl text-black font-semibold top-4 left-4 rounded-sm transition-transform`,
+        `absolute w-[200px] h-[200px] flex items-center justify-center text-3xl text-black font-semibold top-4 left-4 rounded-sm transition-all`,
         COLORS[(Math.log(tile.value) / Math.log(2) - 1) % COLORS.length]
       )}
       style={{
