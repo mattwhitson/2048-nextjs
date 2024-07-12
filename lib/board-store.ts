@@ -4,14 +4,20 @@ export interface TileState {
   id: string;
   value: number;
   position: number;
-  hasChanged: boolean;
+  hasMerged: boolean;
+  toBeDeleted: boolean;
+  arrayIndex: number;
+  placeholderPosition: number;
 }
 
+export type TileStateMap = Map<number, TileState>; // Key is going to be the arrayIndex
 export interface BoardState {
   boardSize: number;
   tiles: TileState[];
+  tilesMap: TileStateMap;
   currentGameState: "Lost" | "Won" | "Playing";
   currentScore: number;
+  currentlyMovingTiles: boolean;
 }
 
 interface ResizeBoard {
@@ -21,7 +27,12 @@ interface ResizeBoard {
 
 interface UpdateTiles {
   type: "updateGameState";
-  payload: { tiles: TileState[]; points: number };
+  payload: {
+    tiles: TileState[];
+    points: number;
+    currentlyMovingTiles: boolean;
+    tilesMap: TileStateMap;
+  };
 }
 
 interface GameOver {
@@ -47,10 +58,11 @@ export type BoardActions =
   | WonGame;
 
 export const defaultBoardState: BoardState = {
+  ...initBoardState(4),
   boardSize: 4,
-  tiles: initBoardState(4),
   currentGameState: "Playing",
   currentScore: 0,
+  currentlyMovingTiles: false,
 };
 
 export function initBoardState(dimensions: number) {
@@ -69,7 +81,13 @@ export function initBoardState(dimensions: number) {
   tiles[tile1.position] = tile1;
   tiles[tile2.position] = tile2;
 
-  return tiles;
+  const tilesMap: TileStateMap = new Map();
+
+  for (const tile of tiles) {
+    tilesMap.set(tile.arrayIndex, tile);
+  }
+
+  return { tiles, tilesMap };
 }
 
 export function initTiles(dimensions: number) {
@@ -82,16 +100,22 @@ export function initTiles(dimensions: number) {
   return tiles;
 }
 
-export function generateNewTile(position: number, value?: number) {
+export function generateNewTile(position: number, value?: number): TileState {
   return {
     id: uuidv4(),
     value: value ? value : Math.random() > 0.1 ? 2 : 4,
     position,
-    hasChanged: false,
+    hasMerged: false,
+    toBeDeleted: false,
+    arrayIndex: position,
+    placeholderPosition: -1,
   };
 }
 
-export function boardReducer(state: BoardState, action: BoardActions) {
+export function boardReducer(
+  state: BoardState,
+  action: BoardActions
+): BoardState {
   switch (action.type) {
     case "resizeBoard":
       return { ...state, boardSize: action.payload };
@@ -99,16 +123,19 @@ export function boardReducer(state: BoardState, action: BoardActions) {
       return {
         ...state,
         tiles: action.payload.tiles,
+        tilesMap: action.payload.tilesMap,
         currentScore: state.currentScore + action.payload.points,
+        currentlyMovingTiles: action.payload.currentlyMovingTiles,
       };
     case "endGame":
       return { ...state, currentGameState: action.payload };
     case "restartGame":
       return {
+        ...initBoardState(action.payload),
         boardSize: action.payload,
-        tiles: initBoardState(action.payload),
         currentGameState: "Playing",
         currentScore: 0,
+        currentlyMovingTiles: false,
       };
     case "wonGame":
       return { ...state, currentGameState: action.payload };
