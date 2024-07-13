@@ -14,8 +14,13 @@ import {
   reorderTiles,
 } from "@/lib/move-logic";
 import { useModal } from "@/lib/modal-store";
+import { lerp } from "@/lib/utils";
 
-export function Tiles() {
+interface TileProps {
+  tileWidth: number;
+}
+
+export function Tiles({ tileWidth }: TileProps) {
   const { boardState, dispatch } = useBoardStateContext();
   const { tiles, tilesMap, boardSize, currentGameState, currentlyMovingTiles } =
     boardState;
@@ -101,7 +106,14 @@ export function Tiles() {
   return (
     <>
       {tiles.map((tile) => (
-        <Tile key={tile.id} tile={tile} />
+        <Tile
+          key={tile.id}
+          tile={tile}
+          tileWidth={tileWidth}
+          borderPaddingOffset={
+            1.0 - lerp(0.0, 0.8, (boardSize - 4) / boardSize)
+          }
+        />
       ))}
     </>
   );
