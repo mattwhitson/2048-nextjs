@@ -1,0 +1,18 @@
+@keyframes fadeInAndOut {
+  0% {
+    transform: translateY(0%);
+    opacity: 0;
+  }
+  50% {
+    transform: translateY(-100%);
+    opacity: 0.9;
+  }
+  100% {
+    transform: translateY(-100%);
+    opacity: 0;
+  }
+}
+
+.scoreAnimation {
+  animation: fadeInAndOut 500ms ease;
+}

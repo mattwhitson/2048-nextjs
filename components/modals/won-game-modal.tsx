@@ -29,6 +29,7 @@ export function WonGameModal() {
           </DialogDescription>
           <p className="text-center">
             Give yourself a pat on the back! This game can be deceptively hard
+            (depending on the board size you chose, of course!)
           </p>
         </DialogHeader>
         <div className="flex w-full justify-center items-center mt-8">

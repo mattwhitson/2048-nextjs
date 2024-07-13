@@ -156,7 +156,6 @@ function calculateNewTilePositions(
 }
 
 function canPerformAnotherMove(tiles: TileState[], boardSize: number) {
-  console.log(tiles);
   for (let row = 0; row < boardSize; row++) {
     for (let col = 0; col < boardSize; col++) {
       if (

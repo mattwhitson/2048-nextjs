@@ -24,6 +24,7 @@ export interface BoardState {
   tilesMap: TileStateMap;
   currentGameState: GameState;
   currentScore: number;
+  scoreChange: { points: number; id: string }[];
   currentlyMovingTiles: boolean;
 }
 
@@ -37,6 +38,7 @@ interface UpdateTiles {
   payload: {
     tiles: TileState[];
     points: number;
+    scoreChange: number;
     currentlyMovingTiles: boolean;
     tilesMap: TileStateMap;
   };
@@ -63,6 +65,7 @@ export const defaultBoardState: BoardState = {
   boardSize: 4,
   currentGameState: GameState.Playing,
   currentScore: 0,
+  scoreChange: [],
   currentlyMovingTiles: false,
 };
 
@@ -121,6 +124,12 @@ export function boardReducer(
     case "resizeBoard":
       return { ...state, boardSize: action.payload };
     case "updateGameState":
+      if (action.payload.scoreChange > 0)
+        state.scoreChange.push({
+          points: action.payload.scoreChange,
+          id: uuidv4(),
+        });
+      if (state.scoreChange.length > 20) state.scoreChange.shift();
       return {
         ...state,
         tiles: action.payload.tiles,
@@ -131,6 +140,7 @@ export function boardReducer(
 
     case "restartGame":
       return {
+        ...state,
         ...initBoardState(action.payload),
         boardSize: action.payload,
         currentGameState: GameState.Playing,

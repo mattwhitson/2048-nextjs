@@ -52,6 +52,7 @@ export function Tiles({ tileWidth }: TileProps) {
         type: "updateGameState",
         payload: {
           points,
+          scoreChange: points,
           tiles,
           tilesMap,
           currentlyMovingTiles: true,
@@ -71,6 +72,7 @@ export function Tiles({ tileWidth }: TileProps) {
           type: "updateGameState",
           payload: {
             points: 0,
+            scoreChange: 0,
             tiles,
             tilesMap,
             currentlyMovingTiles: false,

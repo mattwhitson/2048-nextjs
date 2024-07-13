@@ -8,15 +8,15 @@ import { useEffect } from "react";
 const COLORS = [
   "bg-slate-300",
   "bg-green-200",
-  "bg-green-500",
-  "bg-emerald-200",
+  "bg-green-300",
+  "bg-emerald-400",
   "bg-emerald-500",
-  "bg-teal-200",
+  "bg-teal-400",
   "bg-teal-500",
-  "bg-blue-200",
+  "bg-blue-400",
   "bg-blue-500",
-  "bg-cyan-200",
   "bg-cyan-500",
+  "bg-cyan-600",
 ];
 
 interface TileProps {

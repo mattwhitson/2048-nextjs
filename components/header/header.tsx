@@ -1,15 +1,22 @@
 "use client";
 
 import { useModal } from "@/lib/modal-store";
-import { useBoardStateContext } from "./providers/board-state-provider";
+import { useBoardStateContext } from "../providers/board-state-provider";
+import { Points } from "@/components/header/points";
 
 export function Header() {
   const { onOpen } = useModal();
   const { boardState } = useBoardStateContext();
-  const { currentScore } = boardState;
+  const { currentScore, scoreChange } = boardState;
+  console.log(scoreChange);
   return (
     <header className="w-full flex flex-row mb-8 md:mb-12 items-center relative">
-      <h3 className="text-3xl">{currentScore}</h3>
+      <div className="relative">
+        {scoreChange.map((score) => (
+          <Points key={score.id} pointsGained={score.points} />
+        ))}
+        <h3 className="text-3xl">{currentScore}</h3>
+      </div>
       <h1 className="text-6xl sm:text-7xl font-bold relative text-center mx-auto">
         2048 <span className="absolute text-xs text-nowrap">With a twist!</span>
       </h1>
