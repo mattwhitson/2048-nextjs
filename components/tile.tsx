@@ -3,6 +3,7 @@
 import { TileState } from "@/lib/board-store";
 import { cn } from "@/lib/utils";
 import { useBoardStateContext } from "./providers/board-state-provider";
+import { useEffect } from "react";
 
 const COLORS = [
   "bg-slate-300",
@@ -20,16 +21,21 @@ const COLORS = [
 
 interface TileProps {
   tile: TileState;
+  tileWidth: number;
   borderPaddingOffset?: number;
 }
 
-export function Tile({ tile, borderPaddingOffset = 1 }: TileProps) {
+export function Tile({ tile, tileWidth, borderPaddingOffset = 1 }: TileProps) {
   const { boardState } = useBoardStateContext();
   const { boardSize } = boardState;
   const xOffset = (tile.position % boardSize) * 100;
   const xBorderOffset = borderPaddingOffset * (xOffset / 100);
   const yOffset = Math.floor(tile.position / boardSize) * 100;
   const yBorderOffset = borderPaddingOffset * (yOffset / 100);
+
+  useEffect(() => {
+    // TODO: change font size depending on tile width
+  }, [tileWidth]);
 
   // when recalcuting board size, we will need to take into account top and left values for padding/margin of grid
   // also will need to calculate the width of the squares dynamically and yeah, prpobably something else im forgetting
@@ -41,8 +47,10 @@ export function Tile({ tile, borderPaddingOffset = 1 }: TileProps) {
       )}
       style={{
         transform: `translate(calc(${xOffset}% + ${xBorderOffset}rem), calc(${yOffset}% + ${yBorderOffset}rem))`,
-        width: `${200 * (4 / boardSize)}px`,
-        height: `${200 * (4 / boardSize)}px`,
+        width: `${tileWidth * (4 / boardSize)}px`,
+        height: `${tileWidth * (4 / boardSize)}px`,
+        top: `${borderPaddingOffset}rem`,
+        left: `${borderPaddingOffset}rem`,
       }}
     >
       {tile.value !== -1 && tile.value}
